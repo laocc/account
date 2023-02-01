@@ -1,6 +1,6 @@
 <?php
 
-namespace patch\account\src;
+namespace laocc\account;
 
 use esp\http\Http;
 use esp\session\Session;
@@ -9,7 +9,6 @@ class Client extends Base
 {
     private string $key;
     private string $api;
-    private string $token;
     private string $sessKey = 'admin';
     private int $active = 60;//秒
     private Session $session;
@@ -174,7 +173,6 @@ class Client extends Base
     {
         $admin = $this->session->get($this->sessKey);
         if (!$admin or !($admin['id'] ?? 0)) return 'empty';
-//        $this->debug($admin);
         if ($this->signCheck($admin) !== true) return 'error';//修改账号状态、权限、密码、登录盐值，都会强制账号重新登录
         unset($admin['sign']);
         if (!$active) return $admin;
@@ -210,7 +208,6 @@ class Client extends Base
             ->data($param)
             ->sign($this->token)
             ->post("{$this->api}{$uri}");
-//        $this->debug($data);
         if ($e = $data->error()) return $e;
 
         return $data->data('data');

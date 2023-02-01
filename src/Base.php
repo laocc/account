@@ -1,11 +1,12 @@
 <?php
 
-namespace patch\account\src;
+namespace laocc\account;
 
 use esp\core\Library;
 
 abstract class Base extends Library
 {
+    protected string $token;
 
     public function encode_url(array $data): string
     {
@@ -23,18 +24,18 @@ abstract class Base extends Library
     }
 
 
-    public function build_jump_url(array $data): string
+    public function build_jump_url(array $data, string $token): string
     {
         $time = time();
         $url = urlencode(base64_encode(json_encode($data)));
-        $sign = md5("{$url}.{$time}.accountJUMP");
-        return "/account/jump/{$sign}/{$time}/{$url}";
+        $sign = md5("{$url}.{$time}.{$token}");
+        return "/{$sign}/{$time}/{$url}";
     }
 
     public function parse_jump_url(string $sign, string $time, string $data)
     {
         if (abs(time() - intval($time)) > 3) return '链接已失效';
-        if (md5("{$data}.{$time}.accountJUMP") !== $sign) return '非法请求';
+        if (md5("{$data}.{$time}.{$this->token}") !== $sign) return '非法请求';
         return json_decode(base64_decode(urldecode($data)), true);
     }
 

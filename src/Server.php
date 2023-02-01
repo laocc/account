@@ -1,6 +1,6 @@
 <?php
 
-namespace patch\account\src;
+namespace laocc\account;
 
 class Server extends Base
 {
@@ -11,13 +11,13 @@ class Server extends Base
      * @param array $admin
      * @param array $auth
      * @param array $log
+     * @param array $powers
      * @return array
      */
-    public function session(array $admin, array $auth, array $log): array
+    public function session(array $admin, array $site, array $auth, array $log, array $powers): array
     {
         if ($auth['authRole'] & 256) {
-            $power = $this->config('enum.authPower');
-            $auth['authPower'] = ($auth['authPower'] | array_sum(array_keys($power)));
+            $auth['authPower'] = ($auth['authPower'] | array_sum(array_keys($powers)));
         }
 
         return [
