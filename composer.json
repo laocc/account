@@ -1,0 +1,21 @@
+{
+  "name": "laocc/account",
+  "description": "for lcc.account",
+  "homepage": "https://github.com/laocc/account",
+  "authors": [
+    {
+      "name": "fazo",
+      "email": "fazo@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">7.4.0",
+    "laocc/session": ">1.0",
+    "laocc/http": ">1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "laocc\\account\\": "src/"
+    }
+  }
+}
