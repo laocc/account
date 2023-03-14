@@ -29,12 +29,14 @@ abstract class Base extends Library
         $time = time();
         $url = urlencode(base64_encode(json_encode($data)));
         $sign = md5("{$url}.{$time}.{$token}");
+        $this->debug(['string' => "{$url}.{$time}.{$token}"]);
         return "/{$sign}/{$time}/{$url}";
     }
 
     public function parse_jump_url(string $sign, string $time, string $data)
     {
         if (abs(time() - intval($time)) > 3) return '链接已失效';
+        $this->debug(['string' => "{$data}.{$time}.{$this->token}"]);
         if (md5("{$data}.{$time}.{$this->token}") !== $sign) return '非法请求';
         return json_decode(base64_decode(urldecode($data)), true);
     }
