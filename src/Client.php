@@ -29,14 +29,17 @@ class Client extends Base
      * @param string $sign
      * @param string $time
      * @param string $data
+     * @param callable|null $fun
      * @return bool
      */
-    public function jump(string $sign, string $time, string $data)
+    public function jump(string $sign, string $time, string $data, callable $fun = null)
     {
         $admin = $this->parse_jump_url($sign, $time, $data);
         if (is_string($admin)) return $admin;
-
         $admin['sign'] = $this->sign($admin);
+        if (is_callable($fun)) {
+            $admin = $fun($admin);
+        }
         $this->loginSave($admin);
         return true;
     }

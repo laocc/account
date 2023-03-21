@@ -9,6 +9,7 @@ class Server extends Base
      * 返回给应用端的数据
      *
      * @param array $admin
+     * @param array $site
      * @param array $auth
      * @param array $log
      * @param array $powers
@@ -22,6 +23,7 @@ class Server extends Base
 
         return [
             'id' => $admin['adminID'],
+            'user' => $admin['adminUser'],
             'name' => $admin['adminName'],
             'auth' => $auth['authID'],
             'role' => $auth['authRole'],
