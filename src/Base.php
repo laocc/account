@@ -24,13 +24,19 @@ abstract class Base extends Library
     }
 
 
-    public function build_jump_url(array $data, string $token): string
+    public function build_jump_url(array $data, string $token, string $domain): string
     {
         $time = time();
         $url = urlencode(base64_encode(json_encode($data)));
         $sign = md5("{$url}.{$time}.{$token}");
         $this->debug(['string' => "{$url}.{$time}.{$token}"]);
-        return "/{$sign}/{$time}/{$url}";
+
+        $domain = trim($domain, '/');
+        $len = explode('/', $domain);
+        // http://www.domain.com/4,
+        if ($len <= 4) $domain = "{$domain}/account/jump";
+
+        return "{$domain}/{$sign}/{$time}/{$url}/jump.do";
     }
 
     public function parse_jump_url(string $sign, string $time, string $data)
