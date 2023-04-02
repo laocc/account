@@ -34,7 +34,7 @@ abstract class Base extends Library
         $domain = trim($domain, '/');
         $len = explode('/', $domain);
         // http://www.domain.com/4,
-        if ($len <= 4) $domain = "{$domain}/account/jump";
+        if (count($len) <= 3) $domain = "{$domain}/account/jump";
 
         return "{$domain}/{$sign}/{$time}/{$url}/jump.do";
     }
