@@ -36,10 +36,10 @@ class Client extends Base
     {
         $admin = $this->parse_jump_url($sign, $time, $data);
         if (is_string($admin)) return $admin;
-        $admin['sign'] = $this->sign($admin);
         if (is_callable($fun)) {
             $admin = $fun($admin);
         }
+        $admin['sign'] = $this->sign($admin);
         $this->loginSave($admin);
         return true;
     }
