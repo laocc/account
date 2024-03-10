@@ -30,9 +30,9 @@ class Client extends Base
      * @param string $time
      * @param string $data
      * @param callable|null $fun
-     * @return bool
+     * @return bool|string
      */
-    public function jump(string $sign, string $time, string $data, callable $fun = null)
+    public function jump(string $sign, string $time, string $data, callable $fun = null): bool|string
     {
         $admin = $this->parse_jump_url($sign, $time, $data);
         if (is_string($admin)) return $admin;
@@ -47,12 +47,12 @@ class Client extends Base
      * 用户主动退出
      * @return bool|string
      */
-    public function logout()
+    public function logout(): bool|string
     {
         $admin = $this->session->get($this->sessKey);
         $this->loginSave([]);
 
-        $data = $this->post('/site/logout', $admin);
+        $data = $this->post('/dispatcher/logout', $admin);
         if (is_string($data)) return $data;
 
         return true;
@@ -83,16 +83,12 @@ class Client extends Base
         $param = [];
         $param['role'] = $role;
 
-        $admin = $this->post('/site/load', $param);
+        $admin = $this->post('/dispatcher/load', $param);
         if (is_string($admin)) return $admin;
 
         return $admin['admin'];
     }
 
-    public function auth()
-    {
-
-    }
 
     /**
      * 请求微信授权登录的跳转URL
@@ -106,7 +102,7 @@ class Client extends Base
         $param['session'] = session_id();//当前用户的sessionID
         $param['get_json'] = intval($getJson);
 
-        $admin = $this->post('/site/weixin', $param);
+        $admin = $this->post('/dispatcher/weixin', $param);
         if (is_string($admin)) return $admin;
 
         return $admin['redirect'];
@@ -129,7 +125,7 @@ class Client extends Base
         $param['password'] = $this->build_password($pwd);
         $param['session'] = session_id();//当前用户的sessionID
 
-        $data = $this->post('/site/login', $param);
+        $data = $this->post('/dispatcher/login', $param);
         if (is_string($data)) return $data;
 
         $admin = $data['admin'];
@@ -155,12 +151,12 @@ class Client extends Base
      *
      * @return string|void
      */
-    public function center()
+    public function center(string $app)
     {
         $session = $this->session();
         if (is_string($session)) return $session;
 
-        $data = $this->post('/site/center', $session);
+        $data = $this->post("/dispatcher/jump/{$app}/", $session);
         if (is_string($data)) return $data;
 
         return $data;
@@ -187,7 +183,7 @@ class Client extends Base
                 $param['log'] = $admin['log'];
                 $param['salt'] = $admin['salt'];
                 $param['session'] = session_id();//当前用户的sessionID
-                $data = $this->post('/site/active', $param);
+                $data = $this->post('/dispatcher/active', $param);
                 if (is_string($data)) return $data;
                 if (($data['action'] ?? '') === 'exit') $this->loginSave([]);
                 return true;
