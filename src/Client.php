@@ -7,17 +7,21 @@ use esp\session\Session;
 
 class Client extends Base
 {
-    private string $key;
-    private string $api;
-    private string $sessKey = 'admin';
-    private int $active = 60;//秒
+    public string $api;
+    public string $sessKey = 'admin';
+    public string $key;
+    public int $active = 60;//秒
+    private string $host;
     private Session $session;
 
-    public function _init(array $conf)
+    public function _init(array $conf = null)
     {
+        if (is_null($conf)) $conf = $this->config('dim.account');
+
         $this->sessKey = trim($conf['session'] ?? 'admin');
         $this->key = trim($conf['key']);
         $this->token = trim($conf['token']);
+        $this->host = trim($conf['host'] ?? '');
         $this->active = intval($conf['active'] ?? 60);
         $this->api = trim($conf['api'], '/');
         $this->session =& $this->_controller->_dispatcher->_session;
@@ -200,15 +204,19 @@ class Client extends Base
         $param['ip'] = _CIP;
 
         $http = new Http();
-        $data = $http->encode('json')
+        $send = $http->encode('json')
             ->decode('json')
             ->headers('key', $this->key)
             ->data($param)
-            ->sign($this->token)
-            ->post("{$this->api}{$uri}");
-        if ($e = $data->error()) return $e;
+            ->sign($this->token);
 
-        return $data->data('data');
+        if ($this->host) $send->host($this->host);
+
+        $post = $send->post("{$this->api}{$uri}");
+
+        if ($e = $post->error()) return $e;
+
+        return $post->data('data');
     }
 
 }
