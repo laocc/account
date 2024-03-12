@@ -12,6 +12,7 @@ class Client extends Base
     public string $key;
     public int $active = 60;//秒
     private string $host;
+    private bool $test;
     private Session $session;
 
     public function _init(array $conf = null)
@@ -24,6 +25,7 @@ class Client extends Base
         $this->host = trim($conf['host'] ?? '');
         $this->active = intval($conf['active'] ?? 60);
         $this->api = trim($conf['api'], '/');
+        $this->test = boolval($conf['test'] ?? 0);
         $this->session =& $this->_controller->_dispatcher->_session;
     }
 
@@ -211,7 +213,7 @@ class Client extends Base
         if ($this->host) $send->host($this->host);
 
         $post = $send->post("{$this->api}{$uri}");
-
+        if ($this->test) $this->debug($post);
         if ($e = $post->error()) return $e;
 
         return $post->data('data');
