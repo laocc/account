@@ -4,6 +4,22 @@ namespace laocc\account;
 
 class Server extends Base
 {
+    public string $token;
+
+    public function _init(string $token)
+    {
+        $this->token = $token;
+    }
+
+    public function post(bool $checkSign = true): array|string
+    {
+        $post = file_get_contents('php://input');
+        if ($checkSign) {
+            $sign = $this->sign($post, $this->token);
+            if (getenv('HTTP_SIGN') !== $sign) return 'sign error';
+        }
+        return json_decode($post, true);
+    }
 
     /**
      * 返回给应用端的数据

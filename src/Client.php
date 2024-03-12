@@ -44,7 +44,6 @@ class Client extends Base
         if (is_string($admin)) return $admin;
         if (is_callable($fun)) $admin = $fun($admin);
         if (is_string($admin)) return $admin;
-        $admin['sign'] = $this->sign($admin);
         $this->loginSave($admin);
         return true;
     }
@@ -119,10 +118,9 @@ class Client extends Base
      * @param string $pwd
      * @return bool|string
      */
-    public function login(string $user, string $pwd)
+    public function login(string $user, string $pwd): bool|string
     {
         if (!$user or !$pwd) return '请填写账号密码';
-//        if (!is_mob($user)) return '请填写正确的账号密码';
 
         $param = [];
         $param['user'] = $user;
@@ -132,10 +130,8 @@ class Client extends Base
         $data = $this->post('/dispatcher/login', $param);
         if (is_string($data)) return $data;
 
-        $admin = $data['admin'];
-        $admin['sign'] = $this->sign($admin);
-        $this->loginSave($admin);
-        $this->session->set("active{$admin['salt']}", time());
+        $this->loginSave($data['admin']);
+        $this->session->set("active{$data['admin']['salt']}", time());
 
         return true;
     }
@@ -143,11 +139,6 @@ class Client extends Base
     private function loginSave(array $info)
     {
         return $this->session->set($this->sessKey, $info);
-    }
-
-    private function signCheck(array $admin): bool
-    {
-        return $admin['sign'] === $this->sign($admin);
     }
 
     /**
@@ -169,14 +160,13 @@ class Client extends Base
     /**
      * 读取session
      *
+     * @param bool $active
      * @return array|string
      */
-    public function session(bool $active = true)
+    public function session(bool $active = true): array|string
     {
         $admin = $this->session->get($this->sessKey);
         if (!$admin or !($admin['id'] ?? 0)) return 'empty';
-        if ($this->signCheck($admin) !== true) return 'error';//修改账号状态、权限、密码、登录盐值，都会强制账号重新登录
-        unset($admin['sign']);
         if (!$active) return $admin;
 
         $lastTime = $this->session->get("active{$admin['salt']}");
@@ -202,13 +192,13 @@ class Client extends Base
     {
         $param['rand'] = microtime(true);
         $param['ip'] = _CIP;
-
+        $param = json_encode($param, 320);
         $http = new Http();
         $send = $http->encode('json')
             ->decode('json')
             ->headers('key', $this->key)
             ->data($param)
-            ->sign($this->token);
+            ->headers('sign', $this->sign($param, $this->token));
 
         if ($this->host) $send->host($this->host);
 

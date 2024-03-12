@@ -15,15 +15,22 @@ abstract class Base extends Library
 
     public function build_password(string $password): string
     {
-        return base64_encode(serialize($password));
+        return base64_encode(serialize(gzcompress($password)));
     }
 
     public function parse_password(string $pass): string
     {
-        return unserialize(base64_decode($pass));
+        return gzuncompress(unserialize(base64_decode($pass)));
     }
 
-
+    /**
+     * 组合跳入子站的URL
+     *
+     * @param array $data
+     * @param string $token
+     * @param string $domain
+     * @return string
+     */
     public function build_jump_url(array $data, string $token, string $domain): string
     {
         $time = time();
@@ -33,13 +40,20 @@ abstract class Base extends Library
 
         $domain = trim($domain, '/');
         $len = explode('/', $domain);
-        // http://www.domain.com/4,
         if (count($len) <= 3) $domain = "{$domain}/account/jump";
 
         return "{$domain}/{$sign}/{$time}/{$url}/jump.do";
     }
 
-    public function parse_jump_url(string $sign, string $time, string $data)
+    /**
+     * 跳入站时检查URL数据是否合法，并返回相关数据
+     *
+     * @param string $sign
+     * @param string $time
+     * @param string $data
+     * @return array|string
+     */
+    public function parse_jump_url(string $sign, string $time, string $data): array|string
     {
         if (abs(time() - intval($time)) > 3) return '链接已失效';
         $this->debug(['string' => "{$data}.{$time}.{$this->token}"]);
@@ -47,20 +61,9 @@ abstract class Base extends Library
         return json_decode(base64_decode(urldecode($data)), true);
     }
 
-
-    protected function sign(array $admin): string
+    protected function sign(string $post, string $token): string
     {
-        unset($admin['sign']);
-        ksort($admin);
-        $str = [];
-        foreach ($admin as $k => $v) {
-            if ($v === '' or is_null($v)) continue;
-            if (is_bool($v)) $v = intval($v);
-            else if (is_array($v)) $v = json_encode($v, 320);
-            if (!is_string($v)) $v = strval($v);
-            $str[] = "{$k}={$v}";
-        }
-        return md5(implode('&', $str));
+        return md5($post . $token);
     }
 
 }
