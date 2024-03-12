@@ -49,17 +49,15 @@ class Client extends Base
 
     /**
      * 用户主动退出
-     * @return bool|string
+     * @return array|string
      */
-    public function logout(): bool|string
+    public function logout(): array|string
     {
         $admin = $this->session->get($this->sessKey);
-        $this->loginSave([]);
-
         $data = $this->post('/dispatcher/logout', $admin);
         if (is_string($data)) return $data;
-
-        return true;
+        $this->loginSave([]);
+        return $data;
     }
 
 
