@@ -166,7 +166,11 @@ class Client extends Base
     public function session(bool $active = true): array|string
     {
         $admin = $this->session->get($this->sessKey);
-        if (!$admin or !($admin['id'] ?? 0)) return 'empty';
+        if (!$admin or !is_array($admin) or !($admin['id'] ?? 0)) return 'empty';
+        if (!isset($admin['salt'])) {
+            $this->debug(['session' => $admin]);
+            return 'error';
+        }
         if (!$active) return $admin;
 
         $lastTime = $this->session->get("active{$admin['salt']}");
