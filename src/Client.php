@@ -13,6 +13,7 @@ class Client extends Base
     public int $active = 60;//秒
     private string $host;
     private bool $test;
+    private bool $async;
     private Session $session;
 
     public function _init(array $conf = null)
@@ -26,6 +27,7 @@ class Client extends Base
         $this->active = intval($conf['active'] ?? 60);
         $this->api = trim($conf['api'], '/');
         $this->test = boolval($conf['test'] ?? 0);
+        $this->async = boolval($conf['async'] ?? 1);
         $this->session =& $this->_controller->_dispatcher->_session;
     }
 
@@ -136,7 +138,7 @@ class Client extends Base
         return true;
     }
 
-    private function loginSave(array $info)
+    public function loginSave(array $info)
     {
         return $this->session->set($this->sessKey, $info);
     }
@@ -194,6 +196,8 @@ class Client extends Base
 
     private function post(string $uri, array $param)
     {
+        if (!$this->async) return [];
+
         $param['rand'] = microtime(true);
         $param['ip'] = _CIP;
         $param = json_encode($param, 320);
