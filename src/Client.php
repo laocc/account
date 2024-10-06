@@ -57,7 +57,7 @@ class Client extends Base
     public function logout(): array|string
     {
         $admin = $this->session->get($this->sessKey);
-        $data = $this->post('/dispatcher/logout', $admin);
+        $data = $this->post('/dispatcher/logout', $admin ?: []);
         if (is_string($data)) return $data;
         $this->loginSave([]);
         return $data;
@@ -151,7 +151,7 @@ class Client extends Base
     public function center(string $app)
     {
         $session = $this->session();
-        if (is_string($session)) return $session;
+        if (!is_array($session)) return $session;
 
         $data = $this->post("/dispatcher/jump/{$app}/", $session);
         if (is_string($data)) return $data;
