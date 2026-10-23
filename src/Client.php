@@ -16,7 +16,7 @@ class Client extends Base
     private bool $async;
     private Session $session;
 
-    public function _init(array $conf = null)
+    public function _init(?array $conf = null)
     {
         if (is_null($conf)) $conf = $this->config('dim.account');
 
@@ -40,7 +40,7 @@ class Client extends Base
      * @param callable|null $fun
      * @return bool|string
      */
-    public function jump(string $sign, string $time, string $data, callable $fun = null): bool|string
+    public function jump(string $sign, string $time, string $data, ?callable $fun = null): bool|string
     {
         $admin = $this->parse_jump_url($sign, $time, $data);
         if (is_string($admin)) return $admin;
